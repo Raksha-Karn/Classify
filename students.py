@@ -50,8 +50,20 @@ class StudentManager:
         keyword = keyword.lower()
         return [s for s in self.student if keyword in s["name"].lower() or keyword in s["email"].lower()]
 
-    def edit_student(self, student_id):
-        pass
+    def edit_student(self, student_id: str, **updates):
+        for student in self.students:
+            if student["id"] == student_id:
+                for key, value in updates.items():
+                    if key in student and value is not None:
+                        student[key] = value
+                return student
+        return None
+    
+    def delete_student(self, student_id: str):
+        for i, student in enumerate(self.students):
+            if student["id"] == student_id:
+                return self.students.pop(i)
+        return None
 
 
 
