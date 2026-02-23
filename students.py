@@ -34,6 +34,23 @@ class StudentManager:
             return [s for s in result if s["section"] == section]
         
         return result
+    
+    def view_student_by_id(self, student_id):
+        for student in self.students:
+            if student["id"] == student_id:
+                return student
+        return None
+    
+    def paginate(self, data: List[dict], page: int = 1, limit: int = 10):
+        start = (page - 1) * limit
+        end = start + limit
+        return data[start:end]
+    
+    def search_student(self, name:str = None, email:str = None):
+        pass
+
+    def edit_student(self, student_id):
+        pass
 
 
 
