@@ -46,8 +46,9 @@ class StudentManager:
         end = start + limit
         return data[start:end]
     
-    def search_student(self, name:str = None, email:str = None):
-        pass
+    def search_student(self, keyword: str):
+        keyword = keyword.lower()
+        return [s for s in self.student if keyword in s["name"].lower() or keyword in s["email"].lower()]
 
     def edit_student(self, student_id):
         pass
