@@ -9,7 +9,7 @@ class CourseManager:
 
     def add_course(self, course_name:str, course_code:str, faculty:str, degree:str, level_type:str, level_value:str, course_class:str):
         course = {
-            "id": uuid.uuid4(),
+            "id": str(uuid.uuid4()),
             "course_code": course_code,
             "course_name": course_name,
             "course_class": course_class,
@@ -40,8 +40,8 @@ class CourseManager:
         for course in self.courses:
             faculty = course["faculty"]
             degree = course["degree"]
-            level = f"{course["level_type"].capitalize()} {course["level_value"]}"
-            grouped = [faculty][degree][level].append(course)
+            level = f"{course['level_type'].capitalize()} {course['level_value']}"
+            grouped[faculty][degree][level].append(course)
         return grouped
 
     def view_course_by_id(self, course_id):
