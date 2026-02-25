@@ -41,7 +41,7 @@ class StudentManager:
                 return student
         return None
     
-    def paginate(self, data: List[dict], page: int = 1, limit: int = 10):
+    def paginated_view(self, data: List[dict], page: int = 1, limit: int = 10):
         start = (page - 1) * limit
         end = start + limit
         return data[start:end]
