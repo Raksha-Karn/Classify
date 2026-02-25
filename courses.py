@@ -18,4 +18,13 @@ class CourseManager:
 
         self.courses.append(course)
 
+    def edit_course(self, course_id, **updates):
+        for course in self.courses:
+            if course["id"] == course_id:
+                for key, value in updates.items():
+                    if key in course and value is not None:
+                        course[key] = value
+                return course
+        return None
     
+   
