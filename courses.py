@@ -75,8 +75,11 @@ class CourseManager:
                 result.append(course)
         return result
 
-    def delete_course(self):
-        pass
+    def delete_course(self, course_id):
+        for i, course in enumerate(self.courses):
+            if course["id"] == course_id:
+                return self.courses.pop(i)
+        return None
 
     def assign_teacher(self):
         pass
