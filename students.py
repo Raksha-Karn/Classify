@@ -64,8 +64,3 @@ class StudentManager:
             if student["id"] == student_id:
                 return self.students.pop(i)
         return None
-
-
-
-    
-
