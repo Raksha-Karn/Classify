@@ -1,17 +1,18 @@
 import uuid 
 from collections import defaultdict
-from typing import List
+from typing import List, Optional
 
 
 class CourseManager:
     def __init__(self):
         self.courses = []
 
-    def add_course(self, course_name:str, course_code:str, faculty:str, degree:str, level_type:str, level_value:str):
+    def add_course(self, course_name:str, course_code:str, faculty:str, degree:str, level_type:str, level_value:str, course_class:str):
         course = {
             "id": uuid.uuid4(),
             "course_code": course_code,
             "course_name": course_name,
+            "course_class": course_class,
             "faculty": faculty,
             "degree": degree,
             "level_type": level_type,
@@ -53,6 +54,26 @@ class CourseManager:
         start = (page - 1)*limit
         end = start + limit
         return data[start:end]
+    
+    def filter_search(self, faculty: Optional[str], degree: Optional[str], course_class: Optional[str]):
+        result = self.courses
+
+        if faculty:
+            return [s for s in result if s["faculty"] == faculty]
+        
+        if degree:
+            return [s for s in result if s["degree"] == degree]
+
+        if course_class:
+            return [s for s in result if s["course_class"] == course_class]
+    
+    def search_by_level(self, keyword:str):
+        keyword = keyword.lower()
+        result = []
+        for course in self.courses:
+            if keyword in course["faculty"].lower() or keyword in course["degree"].lower() or keyword in course["level_value"].lower() or keyword in course["course_class"].lower():
+                result.append(course)
+        return result
 
     def delete_course(self):
         pass
