@@ -27,7 +27,7 @@ class TeacherManager:
                 return teacher
         return None
     
-    def view_teachers(self, faculty: Optional[str] = None, student_class: Optional[str] = None, degree: Optional[str] = None, section: Optional[str] = None) -> List[dict]):
+    def view_teachers(self, faculty: Optional[str] = None, student_class: Optional[str] = None, degree: Optional[str] = None, section: Optional[str] = None) -> List[dict]:
         result = self.teachers
         if faculty:
             return [s for s in result if s["faculty"] == faculty]
