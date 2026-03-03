@@ -49,7 +49,8 @@ class TeacherManager:
                 return teacher
         return None
     
-    
-    
-
-                
+    def delete_teacher(self, teacher_id):
+        for i, teacher in enumerate(self.teachers):
+            if teacher["id"] == teacher_id:
+                return self.teachers.pop(i)
+        return None
