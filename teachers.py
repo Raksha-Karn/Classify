@@ -42,5 +42,14 @@ class TeacherManager:
             return [s for s in result if s["section"] == section]
         
         return result
+    
+    def view_teacher_by_id(self, teacher_id):
+        for teacher in self.teachers:
+            if teacher["id"] == teacher_id:
+                return teacher
+        return None
+    
+    
+    
 
                 
