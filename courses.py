@@ -99,15 +99,3 @@ class CourseManager:
             if course.id == course_id:
                 return self.courses.pop(i).to_dict()
         return None
-
-    def assign_teacher(self):
-        pass
-
-    def enroll_student(self):
-        pass
-
-    def get_students_in_course(self):
-        pass
-
-    def get_courses_of_student(self):
-        pass
