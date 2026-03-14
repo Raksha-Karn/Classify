@@ -1,5 +1,6 @@
 import re
 import uuid
+from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from typing import List, Optional
 
@@ -38,6 +39,10 @@ def _optional_int(value: Optional[int], field_name: str) -> Optional[int]:
 
 def _generate_id() -> str:
     return str(uuid.uuid4())
+
+
+def utc_now() -> str:
+    return datetime.utcnow().isoformat()
 
 
 @dataclass
@@ -125,6 +130,7 @@ class Enrollment:
     course_id: str
     teacher_id: Optional[str] = None
     status: str = "active"
+    enrolled_at: str = field(default_factory=utc_now)
     id: str = field(default_factory=_generate_id)
 
     def __post_init__(self):
@@ -143,6 +149,7 @@ class Grade:
     grade_letter: Optional[str] = None
     grade_numeric: Optional[float] = None
     term: Optional[str] = None
+    recorded_at: str = field(default_factory=utc_now)
     id: str = field(default_factory=_generate_id)
 
     def __post_init__(self):
