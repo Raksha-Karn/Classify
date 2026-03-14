@@ -74,6 +74,16 @@ class ReportManager:
             for key, value in data.items():
                 f.write(f"{key},{value}\n")
 
+    def gpa_stats(self, gpa_values: List[float]) -> Dict[str, Any]:
+        if not gpa_values:
+            return {"count": 0, "min": None, "max": None, "avg": None}
+        return {
+            "count": len(gpa_values),
+            "min": min(gpa_values),
+            "max": max(gpa_values),
+            "avg": sum(gpa_values) / len(gpa_values),
+        }
+
     def numeric_bucket(self, value: float) -> str:
         if value >= 90:
             return "90-100"
