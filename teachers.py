@@ -16,6 +16,12 @@ class TeacherManager:
     def save(self, filename: str = "teachers.json"):
         self.store.save_list(filename, [t.to_dict() for t in self.teachers])
 
+    def list_models(self):
+        return self.teachers
+
+    def list_dicts(self):
+        return [t.to_dict() for t in self.teachers]
+
     def add_teacher(
         self,
         name: str,

@@ -1,5 +1,5 @@
-from collections import Counter, defaultdict
-from typing import List, Dict
+from collections import Counter
+from typing import List, Dict, Any
 
 from models import Student, Course, Grade, Enrollment
 
@@ -8,40 +8,52 @@ class ReportManager:
     def __init__(self):
         pass
 
-    def students_per_class(self, students: List[Student]) -> Dict[int, int]:
+    def get_attr(self, item: Any, key: str):
+        if isinstance(item, dict):
+            return item.get(key)
+        return getattr(item, key, None)
+
+    def students_per_class(self, students: List[Any]) -> Dict[int, int]:
         counter = Counter()
         for s in students:
-            if s.student_class is not None:
-                counter[s.student_class] += 1
+            student_class = self.get_attr(s, "student_class")
+            if student_class is not None:
+                counter[student_class] += 1
         return dict(counter)
 
-    def students_per_faculty(self, students: List[Student]) -> Dict[str, int]:
+    def students_per_faculty(self, students: List[Any]) -> Dict[str, int]:
         counter = Counter()
         for s in students:
-            if s.faculty:
-                counter[s.faculty] += 1
+            faculty = self.get_attr(s, "faculty")
+            if faculty:
+                counter[faculty] += 1
         return dict(counter)
 
-    def courses_per_level(self, courses: List[Course]) -> Dict[str, int]:
+    def courses_per_level(self, courses: List[Any]) -> Dict[str, int]:
         counter = Counter()
         for c in courses:
-            key = f"{c.level_type}:{c.level_value}"
+            level_type = self.get_attr(c, "level_type")
+            level_value = self.get_attr(c, "level_value")
+            key = f"{level_type}:{level_value}"
             counter[key] += 1
         return dict(counter)
 
-    def enrollment_per_course(self, enrollments: List[Enrollment]) -> Dict[str, int]:
+    def enrollment_per_course(self, enrollments: List[Any]) -> Dict[str, int]:
         counter = Counter()
         for e in enrollments:
-            counter[e.course_id] += 1
+            course_id = self.get_attr(e, "course_id")
+            counter[course_id] += 1
         return dict(counter)
 
-    def grade_distribution(self, grades: List[Grade]) -> Dict[str, int]:
+    def grade_distribution(self, grades: List[Any]) -> Dict[str, int]:
         counter = Counter()
         for g in grades:
-            if g.grade_letter:
-                counter[g.grade_letter.upper()] += 1
-            elif g.grade_numeric is not None:
-                key = self.numeric_bucket(g.grade_numeric)
+            grade_letter = self.get_attr(g, "grade_letter")
+            grade_numeric = self.get_attr(g, "grade_numeric")
+            if grade_letter:
+                counter[str(grade_letter).upper()] += 1
+            elif grade_numeric is not None:
+                key = self.numeric_bucket(grade_numeric)
                 counter[key] += 1
         return dict(counter)
 

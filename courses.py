@@ -18,6 +18,12 @@ class CourseManager:
     def save(self, filename: str = "courses.json"):
         self.store.save_list(filename, [c.to_dict() for c in self.courses])
 
+    def list_models(self):
+        return self.courses
+
+    def list_dicts(self):
+        return [c.to_dict() for c in self.courses]
+
     def add_course(
         self,
         course_name: str,

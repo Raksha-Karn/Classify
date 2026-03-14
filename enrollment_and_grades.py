@@ -17,6 +17,12 @@ class EnrollmentManager:
     def save(self, filename: str = "enrollments.json"):
         self.store.save_list(filename, [e.to_dict() for e in self.enrollments])
 
+    def list_models(self):
+        return self.enrollments
+
+    def list_dicts(self):
+        return [e.to_dict() for e in self.enrollments]
+
     def enroll_student(self, student_id: str, course_id: str, teacher_id: Optional[str] = None):
         enrollment = Enrollment(student_id=student_id, course_id=course_id, teacher_id=teacher_id)
         self.enrollments.append(enrollment)
@@ -57,6 +63,12 @@ class GradeManager:
 
     def save(self, filename: str = "grades.json"):
         self.store.save_list(filename, [g.to_dict() for g in self.grades])
+
+    def list_models(self):
+        return self.grades
+
+    def list_dicts(self):
+        return [g.to_dict() for g in self.grades]
 
     def record_grade(
         self,
