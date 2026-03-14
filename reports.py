@@ -1,5 +1,6 @@
 from collections import Counter
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
+from datetime import datetime
 
 from data_store import DataStore
 
@@ -83,6 +84,33 @@ class ReportManager:
             "max": max(gpa_values),
             "avg": sum(gpa_values) / len(gpa_values),
         }
+
+    def monthly_enrollments(self, enrollments: List[Any]) -> Dict[str, int]:
+        counter = Counter()
+        for e in enrollments:
+            enrolled_at = self.get_attr(e, "enrolled_at")
+            month = self.month_key(enrolled_at)
+            if month:
+                counter[month] += 1
+        return dict(counter)
+
+    def monthly_grades(self, grades: List[Any]) -> Dict[str, int]:
+        counter = Counter()
+        for g in grades:
+            recorded_at = self.get_attr(g, "recorded_at")
+            month = self.month_key(recorded_at)
+            if month:
+                counter[month] += 1
+        return dict(counter)
+
+    def month_key(self, date_str: Any) -> Any:
+        if not date_str:
+            return None
+        try:
+            dt = datetime.fromisoformat(str(date_str))
+            return f"{dt.year:04d}-{dt.month:02d}"
+        except ValueError:
+            return None
 
     def numeric_bucket(self, value: float) -> str:
         if value >= 90:
