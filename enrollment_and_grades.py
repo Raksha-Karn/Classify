@@ -23,8 +23,26 @@ class EnrollmentManager:
     def list_dicts(self):
         return [e.to_dict() for e in self.enrollments]
 
-    def enroll_student(self, student_id: str, course_id: str, teacher_id: Optional[str] = None):
-        enrollment = Enrollment(student_id=student_id, course_id=course_id, teacher_id=teacher_id)
+    def enroll_student(
+        self,
+        student_id: str,
+        course_id: str,
+        teacher_id: Optional[str] = None,
+        enrolled_at: Optional[str] = None,
+    ):
+        if enrolled_at:
+            enrollment = Enrollment(
+                student_id=student_id,
+                course_id=course_id,
+                teacher_id=teacher_id,
+                enrolled_at=enrolled_at,
+            )
+        else:
+            enrollment = Enrollment(
+                student_id=student_id,
+                course_id=course_id,
+                teacher_id=teacher_id,
+            )
         self.enrollments.append(enrollment)
         return enrollment.to_dict()
 
@@ -76,13 +94,23 @@ class GradeManager:
         grade_letter: Optional[str] = None,
         grade_numeric: Optional[float] = None,
         term: Optional[str] = None,
+        recorded_at: Optional[str] = None,
     ):
-        grade = Grade(
-            enrollment_id=enrollment_id,
-            grade_letter=grade_letter,
-            grade_numeric=grade_numeric,
-            term=term,
-        )
+        if recorded_at:
+            grade = Grade(
+                enrollment_id=enrollment_id,
+                grade_letter=grade_letter,
+                grade_numeric=grade_numeric,
+                term=term,
+                recorded_at=recorded_at,
+            )
+        else:
+            grade = Grade(
+                enrollment_id=enrollment_id,
+                grade_letter=grade_letter,
+                grade_numeric=grade_numeric,
+                term=term,
+            )
         self.grades.append(grade)
         return grade.to_dict()
 
