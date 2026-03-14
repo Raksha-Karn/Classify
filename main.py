@@ -93,6 +93,7 @@ class EnrollmentCreate(BaseModel):
     student_id: str
     course_id: str
     teacher_id: Optional[str] = None
+    enrolled_at: Optional[str] = None
 
 
 class GradeCreate(BaseModel):
@@ -100,6 +101,7 @@ class GradeCreate(BaseModel):
     grade_letter: Optional[str] = None
     grade_numeric: Optional[float] = None
     term: Optional[str] = None
+    recorded_at: Optional[str] = None
 
 
 class SubjectCreate(BaseModel):
@@ -543,6 +545,16 @@ def report_gpa_stats(_=Depends(require_teacher)):
         if gpa is not None:
             gpa_values.append(gpa)
     return reports.gpa_stats(gpa_values)
+
+
+@app.get("/reports/monthly-enrollments")
+def report_monthly_enrollments(_=Depends(require_teacher)):
+    return reports.monthly_enrollments(enrollments.list_models())
+
+
+@app.get("/reports/monthly-grades")
+def report_monthly_grades(_=Depends(require_teacher)):
+    return reports.monthly_grades(grades.list_models())
 
 
 @app.post("/reports/export-json")
