@@ -156,3 +156,25 @@ class Grade:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+@dataclass
+class User:
+    username: str
+    email: str
+    password_hash: str
+    role: str
+    linked_id: Optional[str] = None
+    id: str = field(default_factory=_generate_id)
+
+    def __post_init__(self):
+        self.username = _require_non_empty(self.username, "username")
+        self.email = _validate_email(self.email)
+        self.password_hash = _require_non_empty(self.password_hash, "password_hash")
+        self.role = _require_non_empty(self.role, "role").lower()
+        if self.role not in {"student", "teacher"}:
+            raise ValueError("role must be student or teacher")
+        self.linked_id = _optional_non_empty(self.linked_id, "linked_id")
+
+    def to_dict(self) -> dict:
+        return asdict(self)
