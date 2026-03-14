@@ -11,6 +11,7 @@ from enrollment_and_grades import EnrollmentManager, GradeManager
 from reports import ReportManager
 from users import UserManager
 from auth_utils import create_jwt, decode_jwt
+from token_blacklist import TokenBlacklist
 
 
 app = FastAPI(title="Student Management System")
@@ -22,6 +23,7 @@ enrollments = EnrollmentManager()
 grades = GradeManager()
 reports = ReportManager()
 users = UserManager()
+blacklist = TokenBlacklist()
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev_secret_change_me")
 
@@ -34,6 +36,7 @@ def load_data():
     enrollments.load()
     grades.load()
     users.load()
+    blacklist.load()
 
 
 @app.on_event("shutdown")
@@ -44,6 +47,7 @@ def save_data():
     enrollments.save()
     grades.save()
     users.save()
+    blacklist.save()
 
 
 class StudentCreate(BaseModel):
@@ -132,6 +136,8 @@ def get_current_user(authorization: Optional[str] = Header(default=None)):
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
     token = authorization.split(" ", 1)[1].strip()
+    if blacklist.contains(token):
+        raise HTTPException(status_code=401, detail="Token has been revoked")
     payload = decode_jwt(token, JWT_SECRET)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
@@ -139,6 +145,12 @@ def get_current_user(authorization: Optional[str] = Header(default=None)):
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+
+def get_current_token(authorization: Optional[str] = Header(default=None)):
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
+    return authorization.split(" ", 1)[1].strip()
 
 
 def require_teacher(user=Depends(get_current_user)):
@@ -230,6 +242,17 @@ def reset_password(payload: ResetPasswordPayload):
     return {"status": "ok"}
 
 
+@app.post("/auth/logout")
+def logout(user=Depends(get_current_user), token: str = Depends(get_current_token)):
+    blacklist.add(token)
+    return {"status": "ok"}
+
+
+@app.get("/me")
+def me(user=Depends(get_current_user)):
+    return user.to_dict()
+
+
 @app.post("/students")
 def add_student(payload: StudentCreate, _=Depends(require_teacher)):
     try:
@@ -264,6 +287,10 @@ def get_student(student_id: str, _=Depends(require_self_or_teacher)):
 
 @app.patch("/students/{student_id}")
 def update_student(student_id: str, updates: Dict[str, Any], _=Depends(require_self_or_teacher)):
+    allowed = {"name", "email", "contact", "student_class", "faculty", "degree", "section"}
+    updates = {k: v for k, v in updates.items() if k in allowed}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
     try:
         student = students.edit_student(student_id, **updates)
     except ValueError as e:
@@ -320,6 +347,10 @@ def get_teacher(teacher_id: str, _=Depends(get_current_user)):
 
 @app.patch("/teachers/{teacher_id}")
 def update_teacher(teacher_id: str, updates: Dict[str, Any], _=Depends(require_teacher)):
+    allowed = {"name", "classes", "contact", "meta", "faculty", "degree", "student_class", "section"}
+    updates = {k: v for k, v in updates.items() if k in allowed}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
     try:
         teacher = teachers.edit_teacher(teacher_id, **updates)
     except ValueError as e:
@@ -367,6 +398,10 @@ def get_course(course_id: str, _=Depends(get_current_user)):
 
 @app.patch("/courses/{course_id}")
 def update_course(course_id: str, updates: Dict[str, Any], _=Depends(require_teacher)):
+    allowed = {"course_name", "course_code", "faculty", "degree", "level_type", "level_value", "course_class"}
+    updates = {k: v for k, v in updates.items() if k in allowed}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
     try:
         course = courses.edit_course(course_id, **updates)
     except ValueError as e:
