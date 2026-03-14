@@ -178,3 +178,45 @@ class User:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+@dataclass
+class Subject:
+    name: str
+    code: str
+    faculty: str
+    degree: str
+    level_type: str
+    level_value: int
+    subject_class: str
+    id: str = field(default_factory=_generate_id)
+
+    def __post_init__(self):
+        self.name = _require_non_empty(self.name, "name")
+        self.code = _require_non_empty(self.code, "code")
+        self.faculty = _require_non_empty(self.faculty, "faculty")
+        self.degree = _require_non_empty(self.degree, "degree")
+        self.level_type = _require_non_empty(self.level_type, "level_type").lower()
+        if self.level_type not in {"class", "semester", "year"}:
+            raise ValueError("level_type must be one of: class, semester, year")
+        self.level_value = _optional_int(self.level_value, "level_value")
+        if self.level_value is None:
+            raise ValueError("level_value is required and must be an integer")
+        self.subject_class = _require_non_empty(self.subject_class, "subject_class")
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class Syllabus:
+    subject_id: str
+    content: str
+    id: str = field(default_factory=_generate_id)
+
+    def __post_init__(self):
+        self.subject_id = _require_non_empty(self.subject_id, "subject_id")
+        self.content = _require_non_empty(self.content, "content")
+
+    def to_dict(self) -> dict:
+        return asdict(self)
