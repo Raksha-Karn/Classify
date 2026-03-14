@@ -1,12 +1,22 @@
 from collections import defaultdict
 from typing import List, Optional
 
+from data_store import DataStore
 from models import Course
 
 
 class CourseManager:
-    def __init__(self):
+    def __init__(self, data_dir: str = "data"):
         self.courses = []
+        self.store = DataStore(data_dir)
+
+    def load(self, filename: str = "courses.json"):
+        data = self.store.load_list(filename)
+        self.courses = [Course(**item) for item in data]
+        return self.view_courses()
+
+    def save(self, filename: str = "courses.json"):
+        self.store.save_list(filename, [c.to_dict() for c in self.courses])
 
     def add_course(
         self,

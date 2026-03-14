@@ -1,10 +1,20 @@
 from typing import Optional, List
 
+from data_store import DataStore
 from models import Teacher
 
 class TeacherManager:
-    def __init__(self):
+    def __init__(self, data_dir: str = "data"):
         self.teachers = []
+        self.store = DataStore(data_dir)
+
+    def load(self, filename: str = "teachers.json"):
+        data = self.store.load_list(filename)
+        self.teachers = [Teacher(**item) for item in data]
+        return self.view_teachers()
+
+    def save(self, filename: str = "teachers.json"):
+        self.store.save_list(filename, [t.to_dict() for t in self.teachers])
 
     def add_teacher(
         self,

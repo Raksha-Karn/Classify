@@ -1,10 +1,20 @@
 from typing import Optional, List
 
+from data_store import DataStore
 from models import Student
 
 class StudentManager:
-    def __init__(self):
+    def __init__(self, data_dir: str = "data"):
         self.students = []
+        self.store = DataStore(data_dir)
+
+    def load(self, filename: str = "students.json"):
+        data = self.store.load_list(filename)
+        self.students = [Student(**item) for item in data]
+        return self.view_students()
+
+    def save(self, filename: str = "students.json"):
+        self.store.save_list(filename, [s.to_dict() for s in self.students])
 
     def add_student(
         self,
