@@ -1,12 +1,14 @@
 from collections import Counter
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+
+from data_store import DataStore
 
 from models import Student, Course, Grade, Enrollment
 
 
 class ReportManager:
-    def __init__(self):
-        pass
+    def __init__(self, data_dir: str = "data"):
+        self.store = DataStore(data_dir)
 
     def get_attr(self, item: Any, key: str):
         if isinstance(item, dict):
@@ -56,6 +58,21 @@ class ReportManager:
                 key = self.numeric_bucket(grade_numeric)
                 counter[key] += 1
         return dict(counter)
+
+    def export_json(self, filename: str, data: Dict[str, Any]):
+        filepath = self.store.get_path(filename)
+        self.store.backup_file(filepath)
+        with open(filepath, "w", encoding="utf-8") as f:
+            import json
+            json.dump(data, f, indent=2)
+
+    def export_csv(self, filename: str, data: Dict[str, Any], header_key: str = "key", header_value: str = "value"):
+        filepath = self.store.get_path(filename)
+        self.store.backup_file(filepath)
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(f"{header_key},{header_value}\n")
+            for key, value in data.items():
+                f.write(f"{key},{value}\n")
 
     def numeric_bucket(self, value: float) -> str:
         if value >= 90:
