@@ -391,6 +391,11 @@ def delete_teacher(teacher_id: str, _=Depends(require_teacher)):
     return teacher
 
 
+@app.get("/teachers/search")
+def search_teachers(q: str, _=Depends(require_teacher)):
+    return teachers.search_teachers(q)
+
+
 @app.post("/courses")
 def add_course(payload: CourseCreate, _=Depends(require_teacher)):
     try:
@@ -528,6 +533,16 @@ def report_enrollment_per_course(_=Depends(require_teacher)):
 @app.get("/reports/grade-distribution")
 def report_grade_distribution(_=Depends(require_teacher)):
     return reports.grade_distribution(grades.list_models())
+
+
+@app.get("/reports/gpa-stats")
+def report_gpa_stats(_=Depends(require_teacher)):
+    gpa_values = []
+    for s in students.list_models():
+        gpa = grades.gpa_for_student(s.id, enrollments.list_models())
+        if gpa is not None:
+            gpa_values.append(gpa)
+    return reports.gpa_stats(gpa_values)
 
 
 @app.post("/reports/export-json")
