@@ -39,7 +39,6 @@ Backups are created automatically on save.
 ## Endpoints
 See:
 - `docs/overview.md`
-- `docs/endpoints.md`
 
 ## Project Structure
 - `main.py` FastAPI app and endpoints
