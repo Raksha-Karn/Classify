@@ -18,7 +18,6 @@ class CourseManager:
             "level_type": level_type,
             "level_value": level_value
         }
-
         self.courses.append(course)
 
     def edit_course(self, course_id:str, **updates):
@@ -36,7 +35,6 @@ class CourseManager:
                 lambda: defaultdict(list)
             )
         )
-
         for course in self.courses:
             faculty = course["faculty"]
             degree = course["degree"]
@@ -55,25 +53,26 @@ class CourseManager:
         end = start + limit
         return data[start:end]
     
-    def filter_search(self, faculty: Optional[str], degree: Optional[str], course_class: Optional[str]):
+    def filter_search(self, faculty: Optional[str] = None, degree: Optional[str] = None, course_class: Optional[str] = None):
         result = self.courses
-
         if faculty:
-            return [s for s in result if s["faculty"] == faculty]
-        
+            result = [s for s in result if s["faculty"] == faculty]
         if degree:
-            return [s for s in result if s["degree"] == degree]
-
+            result = [s for s in result if s["degree"] == degree]
         if course_class:
-            return [s for s in result if s["course_class"] == course_class]
-    
-    def search_by_level(self, keyword:str):
-        keyword = keyword.lower()
-        result = []
-        for course in self.courses:
-            if keyword in course["faculty"].lower() or keyword in course["degree"].lower() or keyword in course["level_value"].lower() or keyword in course["course_class"].lower():
-                result.append(course)
+            result = [s for s in result if s["course_class"] == course_class]
         return result
+    
+    def search_by_keyword(self, keyword:str):
+        keyword = keyword.lower()
+        return [
+            course for course in self.courses
+            if keyword in course["faculty"].lower()
+            or keyword in course["degree"].lower()
+            or keyword in course["course_class"].lower()
+            or keyword in course["course_name"].lower()
+            or keyword in course["course_code"].lower()
+        ]
 
     def delete_course(self, course_id):
         for i, course in enumerate(self.courses):

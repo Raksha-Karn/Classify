@@ -48,7 +48,11 @@ class StudentManager:
     
     def search_student(self, keyword: str):
         keyword = keyword.lower()
-        return [s for s in self.student if keyword in s["name"].lower() or keyword in s["email"].lower()]
+        return [
+            s for s in self.students
+            if keyword in s["name"].lower()
+            or keyword in s["email"].lower()
+        ]
 
     def edit_student(self, student_id: str, **updates):
         for student in self.students:

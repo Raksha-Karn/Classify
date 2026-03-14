@@ -7,13 +7,27 @@ class TeacherManager:
     def __init__(self):
         self.teachers = []
 
-    def add_teacher(self, name: str, classes: list, contact: str, meta: str):
+    def add_teacher(
+        self,
+        name: str,
+        classes: list,
+        contact: str,
+        meta: str,
+        faculty: Optional[str] = None,
+        degree: Optional[str] = None,
+        student_class: Optional[str] = None,
+        section: Optional[str] = None,
+    ):
         teacher = {
             "id": str(uuid.uuid4()),
             "name": name,
             "classes": classes,
             "contact": contact,
-            "meta": meta
+            "meta": meta,
+            "faculty": faculty,
+            "degree": degree,
+            "student_class": student_class,
+            "section": section,
         }
 
         self.teachers.append(teacher)
@@ -27,19 +41,25 @@ class TeacherManager:
                 return teacher
         return None
     
-    def view_teachers(self, faculty: Optional[str] = None, student_class: Optional[str] = None, degree: Optional[str] = None, section: Optional[str] = None) -> List[dict]:
+    def view_teachers(
+        self,
+        faculty: Optional[str] = None,
+        student_class: Optional[str] = None,
+        degree: Optional[str] = None,
+        section: Optional[str] = None,
+    ) -> List[dict]:
         result = self.teachers
         if faculty:
-            return [s for s in result if s["faculty"] == faculty]
+            return [s for s in result if s.get("faculty") == faculty]
         
         if student_class:
-            return [s for s in result if s["student_class"] == student_class]
+            return [s for s in result if s.get("student_class") == student_class or student_class in s.get("classes", [])]
         
         if degree:
-            return [s for s in result if s["degree"] == degree]
+            return [s for s in result if s.get("degree") == degree]
         
         if section:
-            return [s for s in result if s["section"] == section]
+            return [s for s in result if s.get("section") == section]
         
         return result
     
