@@ -12,6 +12,8 @@ from reports import ReportManager
 from users import UserManager
 from auth_utils import create_jwt, decode_jwt
 from token_blacklist import TokenBlacklist
+from subjects import SubjectManager
+from syllabus import SyllabusManager
 
 
 app = FastAPI(title="Student Management System")
@@ -24,6 +26,8 @@ grades = GradeManager()
 reports = ReportManager()
 users = UserManager()
 blacklist = TokenBlacklist()
+subjects = SubjectManager()
+syllabi = SyllabusManager()
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev_secret_change_me")
 
@@ -37,6 +41,8 @@ def load_data():
     grades.load()
     users.load()
     blacklist.load()
+    subjects.load()
+    syllabi.load()
 
 
 @app.on_event("shutdown")
@@ -48,6 +54,8 @@ def save_data():
     grades.save()
     users.save()
     blacklist.save()
+    subjects.save()
+    syllabi.save()
 
 
 class StudentCreate(BaseModel):
@@ -92,6 +100,21 @@ class GradeCreate(BaseModel):
     grade_letter: Optional[str] = None
     grade_numeric: Optional[float] = None
     term: Optional[str] = None
+
+
+class SubjectCreate(BaseModel):
+    name: str
+    code: str
+    faculty: str
+    degree: str
+    level_type: str
+    level_value: int
+    subject_class: str
+
+
+class SyllabusCreate(BaseModel):
+    subject_id: str
+    content: str
 
 
 class RegisterStudent(BaseModel):
@@ -517,3 +540,89 @@ def export_report_json(filename: str, data: Dict[str, Any], _=Depends(require_te
 def export_report_csv(filename: str, data: Dict[str, Any], header_key: str = "key", header_value: str = "value", _=Depends(require_teacher)):
     reports.export_csv(filename, data, header_key=header_key, header_value=header_value)
     return {"status": "ok", "file": filename}
+
+
+@app.post("/subjects")
+def add_subject(payload: SubjectCreate, _=Depends(require_teacher)):
+    try:
+        return subjects.add_subject(**payload.dict())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/subjects")
+def list_subjects(
+    faculty: Optional[str] = None,
+    degree: Optional[str] = None,
+    level_type: Optional[str] = None,
+    level_value: Optional[int] = None,
+    subject_class: Optional[str] = None,
+    _=Depends(get_current_user),
+):
+    return subjects.view_subjects(
+        faculty=faculty,
+        degree=degree,
+        level_type=level_type,
+        level_value=level_value,
+        subject_class=subject_class,
+    )
+
+
+@app.get("/subjects/{subject_id}")
+def get_subject(subject_id: str, _=Depends(get_current_user)):
+    subject = subjects.view_subject_by_id(subject_id)
+    if not subject:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    return subject
+
+
+@app.patch("/subjects/{subject_id}")
+def update_subject(subject_id: str, updates: Dict[str, Any], _=Depends(require_teacher)):
+    allowed = {"name", "code", "faculty", "degree", "level_type", "level_value", "subject_class"}
+    updates = {k: v for k, v in updates.items() if k in allowed}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    try:
+        subject = subjects.edit_subject(subject_id, **updates)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if not subject:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    return subject
+
+
+@app.delete("/subjects/{subject_id}")
+def delete_subject(subject_id: str, _=Depends(require_teacher)):
+    subject = subjects.delete_subject(subject_id)
+    if not subject:
+        raise HTTPException(status_code=404, detail="Subject not found")
+    return subject
+
+
+@app.get("/subjects/search")
+def search_subjects(q: str, _=Depends(get_current_user)):
+    return subjects.search_subjects(q)
+
+
+@app.post("/syllabus")
+def set_syllabus(payload: SyllabusCreate, _=Depends(require_teacher)):
+    try:
+        return syllabi.set_syllabus(payload.subject_id, payload.content)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/syllabus/{subject_id}")
+def get_syllabus(subject_id: str, _=Depends(get_current_user)):
+    data = syllabi.get_syllabus(subject_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Syllabus not found")
+    return data
+
+
+@app.delete("/syllabus/{subject_id}")
+def delete_syllabus(subject_id: str, _=Depends(require_teacher)):
+    data = syllabi.delete_syllabus(subject_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Syllabus not found")
+    return data
