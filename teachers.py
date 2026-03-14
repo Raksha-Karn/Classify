@@ -88,3 +88,14 @@ class TeacherManager:
             if teacher.id == teacher_id:
                 return self.teachers.pop(i).to_dict()
         return None
+
+    def search_teachers(self, keyword: str):
+        keyword = keyword.lower()
+        return [
+            t.to_dict() for t in self.teachers
+            if keyword in t.name.lower()
+            or keyword in t.contact.lower()
+            or keyword in t.meta.lower()
+            or (t.faculty and keyword in t.faculty.lower())
+            or (t.degree and keyword in t.degree.lower())
+        ]
